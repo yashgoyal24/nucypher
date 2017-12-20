@@ -2,17 +2,15 @@ import asyncio
 import binascii
 
 import msgpack
-from npre.constants import UNKNOWN_KFRAG
 
-from nkms.characters import Alice, Bob, Ursula
-from nkms.crypto import api
+from nkms.characters import Bob, Ursula
 from nkms.crypto.api import keccak_digest
 from nkms.crypto.constants import NOT_SIGNED
-from nkms.crypto.fragments import KFrag, PFrag
-from nkms.crypto.powers import EncryptingPower
+from nkms.crypto.fragments import PFrag
 from nkms.crypto.signature import Signature
 from nkms.crypto.utils import BytestringSplitter
 from nkms.keystore.keypairs import PublicKey
+from npre.constants import UNKNOWN_KFRAG
 
 
 class Contract(object):
