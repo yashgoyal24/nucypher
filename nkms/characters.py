@@ -344,7 +344,7 @@ class Bob(Character):
 
             pfrags_to_include = []
             for pfrag in pfrags:
-                if not pfrag in self._saved_work_orders.by_ursula(ursula_dht_key):
+                if not pfrag in self._saved_work_orders[ursula_dht_key]:
                     pfrags_to_include.append(pfrag)
 
             if pfrags_to_include:
