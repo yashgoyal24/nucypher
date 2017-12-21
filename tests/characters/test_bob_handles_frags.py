@@ -85,7 +85,8 @@ def test_bob_remember_that_he_has_cfrags_for_a_particular_pfrag(enacted_policy, 
     ursulas_by_pfrag = bob._saved_work_orders.by_pfrag(enacted_policy.pfrag)
 
     # ...and only one WorkOrder from that 1 Ursula.
-    assert len(saved_work_orders) == 1
+    assert len(ursulas_by_pfrag.values()) == 1
+    id_of_ursula_from_whom_we_already_have_a_cfrag = list(ursulas_by_pfrag.keys())[0]
 
     # The rest of this test will show that if Bob generates another WorkOrder, it's for a *different* Ursula.
 
@@ -96,10 +97,10 @@ def test_bob_remember_that_he_has_cfrags_for_a_particular_pfrag(enacted_policy, 
     assert id_of_ursula_from_whom_we_already_have_a_cfrag != id_of_this_new_ursula
 
     # ...and, although this WorkOrder has the same pfrags as the saved one...
-    new_work_order.pfrags == saved_work_orders[0].pfrags
+    assert new_work_order.pfrags[0] == enacted_policy.pfrag
 
-    # ...it's not the same WorkOrder.
-    assert new_work_order not in saved_work_orders
+    # ...it hasn't been saved yet (and won't be until do use it for re-encryption).
+    assert new_work_order not in bob._saved_work_orders.by_pfrag(enacted_policy.pfrag).values()
 
 
 def test_bob_gathers_and_combines(enacted_policy, alice, bob, ursulas):
@@ -109,5 +110,18 @@ def test_bob_gathers_and_combines(enacted_policy, alice, bob, ursulas):
     # ...but the policy requires us to collect more cfrags.
     assert len(bob._saved_work_orders) < enacted_policy.m
 
-    new_work_orders = bob.generate_work_orders(enacted_policy.hrac(), enacted_policy.pfrag, num_ursulas=1)
+    # We'll just generate more without specifying how many.
+    new_work_orders = bob.generate_work_orders(enacted_policy.hrac(), enacted_policy.pfrag)
+
+    # Turns out that Bob is smart enough to only generate as many as he needs to have a work order for every kFrag.
+    assert len(bob._saved_work_orders) + len(new_work_orders) == enacted_policy.n
+
+    # TODO: Maybe show here that we can optionally just generate enough to get to m.  See #150
+
+    # OK, now Bob gets re-encryption from the rest of the Ursulas in the TreasureMap.
+    networky_stuff = MockNetworkyStuff(ursulas)
+    for work_order in new_work_orders.values():
+        bob.get_reencrypted_c_frags(networky_stuff, work_order)
+
+    bob.combine_cfrags(enacted_policy.pfrag)
     assert False
