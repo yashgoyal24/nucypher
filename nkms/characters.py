@@ -363,6 +363,7 @@ class Bob(Character):
             raise ValueError("Ursula gave back the wrong number of cfrags.  She's up to something.")
         for counter, pfrag in enumerate(work_order.pfrags):
             # TODO: Ursula is actually supposed to sign this.  See #141.
+            work_order.cfrags[pfrag] = cfrags[counter]
             self._saved_work_orders[work_order.ursula_id][pfrag] = work_order
         return cfrags
 

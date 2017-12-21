@@ -252,6 +252,7 @@ class WorkOrder(object):
         self.receipt_bytes = receipt_bytes
         self.receipt_signature = receipt_signature
         self.ursula_id = ursula_id  # TODO: We may still need a more elegant system for ID'ing Ursula.  See #136.
+        self.cfrags = {}
 
     def __repr__(self):
         return "WorkOrder (pfrags: {}) {} for {}".format([binascii.hexlify(bytes(p))[:6] for p in self.pfrags],
