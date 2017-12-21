@@ -341,12 +341,9 @@ class Bob(Character):
         for ursula_dht_key in treasure_map_to_use:
             ursula = self._ursulas[ursula_dht_key]
 
-            completed_work_orders_for_this_ursula = self._saved_work_orders.setdefault(ursula_dht_key, [])
-
             pfrags_to_include = []
             for pfrag in pfrags:
-                if not pfrag in sum([wo.pfrags for wo in completed_work_orders_for_this_ursula],
-                                    []):  # TODO: This is inane - probably push it down into a WorkOrderHistory concept.
+                if not pfrag in self._saved_work_orders.by_ursula(ursula_dht_key):
                     pfrags_to_include.append(pfrag)
 
             if pfrags_to_include:
