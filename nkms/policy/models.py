@@ -230,7 +230,7 @@ class TreasureMap(object):
         self.ids = ursula_interface_ids or []
 
     def packed_payload(self):
-        return msgpack.dumps(self.ids)
+        return msgpack.dumps(bytes(i) for i in self.ids)
 
     def add_ursula(self, ursula):
         self.ids.append(ursula.interface_dht_key())

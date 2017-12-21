@@ -297,7 +297,7 @@ class Bob(Character):
     def follow_treasure_map(self, hrac):
         for ursula_interface_id in self.treasure_maps[hrac]:
             # TODO: perform this part concurrently.
-            getter = self.server.get(ursula_interface_id)
+            getter = self.server.get(bytes(ursula_interface_id))
             loop = asyncio.get_event_loop()
             value = loop.run_until_complete(getter)
             signature, ursula_pubkey_sig, hrac, (port, interface, ttl) = dht_value_splitter(value.lstrip(b"uaddr"),
@@ -444,7 +444,7 @@ class Ursula(Character):
 
         dht_key = self.interface_dht_key()
         value = self.interface_dht_value()
-        setter = self.server.set(key=dht_key, value=value)
+        setter = self.server.set(key=bytes(dht_key), value=value)
         blockchain_client._ursulas_on_blockchain.append(dht_key)
         loop = asyncio.get_event_loop()
         loop.run_until_complete(setter)
