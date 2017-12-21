@@ -160,8 +160,7 @@ class Policy(object):
         return self.hash(bytes(self.alice.seal) + self.hrac())
 
     def publish_treasure_map(self):
-        encrypted_treasure_map, signature_for_bob = self.alice.encrypt_for(self.bob,
-                                                                           self.treasure_map.packed_payload())
+        encrypted_treasure_map, signature_for_bob = self.alice.encrypt_for(self.bob, self.treasure_map.packed_payload())
         signature_for_ursula = self.alice.seal(self.hrac())  # TODO: Great use-case for Ciphertext class
 
         # In order to know this is safe to propagate, Ursula needs to see a signature, our public key,
@@ -230,7 +229,7 @@ class TreasureMap(object):
         self.ids = ursula_interface_ids or []
 
     def packed_payload(self):
-        return msgpack.dumps(bytes(i) for i in self.ids)
+         return msgpack.dumps([bytes(i) for i in self.ids])
 
     def add_ursula(self, ursula):
         self.ids.append(ursula.interface_dht_key())
