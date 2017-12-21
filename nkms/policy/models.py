@@ -295,19 +295,32 @@ class WorkOrder(object):
 
 class WorkOrderHistory:
 
+    def __init__(self):
+        self.by_ursula = {}
+
     def __contains__(self, item):
         assert False
 
     def __getitem__(self, item):
+        if isinstance(item, Ursula.InterfaceDHTKey):
+            return self.by_ursula.setdefault(item, {})
+
         assert False
 
     def __setitem__(self, key, value):
         assert False
 
     def __len__(self):
-        assert False
+        return sum(len(work_orders) for work_orders in self.by_ursula.values())
 
-    def by_ursula(self, ursula_dht_key):
-        pfrags_for_this_ursula = self.setdefault(ursula_dht_key, self.ByUrsula())
-        pfrags_for_this_ursula
-        return pfrags_for_this_ursula
+    @property
+    def ursulas(self):
+        return self.by_ursula.keys()
+
+    def by_pfrag(self, pfrag):
+        ursulas_by_pfrags = {}
+        for ursula, pfrags in self.by_ursula.items():
+            for saved_pfrag, work_order in pfrags.items():
+                if saved_pfrag == pfrag:
+                    ursulas_by_pfrags[ursula] = work_order
+        return ursulas_by_pfrags
