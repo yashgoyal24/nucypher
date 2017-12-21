@@ -256,7 +256,7 @@ class WorkOrder(object):
     def __repr__(self):
         return "WorkOrder (pfrags: {}) {} for {}".format([binascii.hexlify(bytes(p))[:6] for p in self.pfrags],
                                                          binascii.hexlify(self.receipt_bytes)[:6],
-                                                         binascii.hexlify(self.ursula_id)[:6])
+                                                         binascii.hexlify(bytes(self.ursula_id))[:6])
 
     def __eq__(self, other):
         return (self.receipt_bytes, self.receipt_signature) == (other.receipt_bytes, other.receipt_signature)
