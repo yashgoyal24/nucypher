@@ -71,7 +71,7 @@ class Policy(object):
     _ursula = None
     hashed_part = None
 
-    def __init__(self, alice, bob=None, kfrags=(UNKNOWN_KFRAG,), pfrag=None, uri=None, alices_signature=NOT_SIGNED):
+    def __init__(self, alice, bob=None, kfrags=(UNKNOWN_KFRAG,), pfrag=None, uri=None, m=None, alices_signature=NOT_SIGNED):
         """
         :param kfrags:  A list of KFrags to distribute per this Policy.
         :param pfrag: The input ciphertext which Bob will give to Ursula to re-encrypt.
@@ -82,11 +82,11 @@ class Policy(object):
         self.kfrags = kfrags
         self.pfrag = pfrag
         self.uri = uri
+        self.m = m
         self.treasure_map = TreasureMap()
         self._accepted_contracts = {}
 
         self.alices_signature = alices_signature
-
 
     class MoreContractsThanKFrags(TypeError):
         """
@@ -116,9 +116,10 @@ class Policy(object):
                    alice,
                    bob,
                    uri,
+                   m,
                    ):
         # TODO: What happened to Alice's signature - don't we include it here?
-        policy = Policy(alice, bob, kfrags, pfrag, uri)
+        policy = Policy(alice, bob, kfrags, pfrag, uri, m)
 
         return policy
 

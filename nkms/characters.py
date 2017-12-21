@@ -26,6 +26,7 @@ from nkms.network.server import NuCypherDHTServer, NuCypherSeedOnlyDHTServer
 from nkms.policy.constants import NOT_FROM_ALICE, NON_PAYMENT
 
 
+
 class Character(object):
     """
     A base-class for any character in our cryptography protocol narrative.
@@ -233,6 +234,7 @@ class Alice(Character):
             kfrags=kfrags,
             pfrag=pfrag,
             uri=uri,
+            m=m,
         )
 
         return policy
@@ -276,7 +278,8 @@ class Bob(Character):
         self.treasure_maps = {}
         if alice:
             self.alice = alice
-        self._saved_work_orders = {}
+        from nkms.policy.models import WorkOrderHistory  # Need a bigger strategy to avoid circulars.
+        self._saved_work_orders = WorkOrderHistory()
 
     @property
     def alice(self):
