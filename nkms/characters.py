@@ -1,6 +1,7 @@
 import asyncio
 import binascii
 from binascii import hexlify
+from contextlib import suppress
 from logging import getLogger
 
 import msgpack
@@ -370,8 +371,20 @@ class Bob(Character):
     def get_ursula(self, ursula_id):
         return self._ursulas[ursula_id]
 
-    def combine_cfrags(self):
-        assert False
+    def cfrags_for_pfrag(self, pfrag):
+        cfrags = []
+        for work_order in self._saved_work_orders.by_pfrag(pfrag).values():
+            with suppress(KeyError):
+                cfrags.append(work_order.cfrags[pfrag])
+        return cfrags
+
+    def combine_cfrags(self, pfrag):
+        cfrags = self.cfrags_for_pfrag(pfrag)
+        combined_ekey = self._crypto_power.combine(cfrags)
+        cfrag_ekey = cfrags[0].encrypted_key[0]
+
+        self._crypto_power.decrypt_reencrypted()
+        return self._crypto_power._decrypt(ekey)
 
 
 class Ursula(Character):
