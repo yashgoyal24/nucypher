@@ -1,15 +1,15 @@
-from typing import Tuple
+from typing import Tuple, List
 
 from nacl.secret import SecretBox
 
 from nkms.crypto import api as API
+from nkms.crypto.fragments import CFrag
 from nkms.keystore import constants
-from npre import umbral
 from npre import elliptic_curve as ec
+from npre import umbral
 
 
 class Keypair(object):
-
     public_only = False
 
     # TODO: Throw error if a key is called and it doesn't exist
@@ -52,12 +52,14 @@ class Keypair(object):
 
         elif keypair_byte == constants.SIG_KEYPAIR_BYTE:
             if key_type_byte == constants.PUB_KEY_BYTE:
-                return SigningKeypair(pubkey=key_data)  # Kinda weird for the moment - we're using all 66 bytes here.  TODO: Decide whether to make this the norm.
+                return SigningKeypair(
+                    pubkey=key_data)  # Kinda weird for the moment - we're using all 66 bytes here.  TODO: Decide whether to make this the norm.
 
             elif key_type_byte == constants.PRIV_KEY_BYTE:
                 return SigningKeypair(privkey=key)
         else:
-            raise ValueError("Unable to determine which type of keypair this is - keypair_byte was {}".format(keypair_byte))
+            raise ValueError(
+                "Unable to determine which type of keypair this is - keypair_byte was {}".format(keypair_byte))
         assert False
 
     def gen_privkey(self):
@@ -114,7 +116,7 @@ class EncryptingKeypair(Keypair):
         # we could use that and save 2 bytes,
         # but it makes the code less readable
         ekey = umbral.EncryptedKey(
-                ekey=ec.deserialize(API.PRE.ecgroup, ekey[0]), re_id=ekey[1])
+            ekey=ec.deserialize(API.PRE.ecgroup, ekey[0]), re_id=ekey[1])
         if privkey is None:
             privkey = self._priv_key
         else:
@@ -145,6 +147,16 @@ class EncryptingKeypair(Keypair):
                           constants.PRIV_KEY_BYTE +
                           self.privkey)
         return serialized_key
+
+    def combine(self, cfrags: List[CFrag]
+                ) -> Tuple[Tuple[bytes, bytes], Tuple[bytes, bytes]]:
+        ekeys = [umbral.EncryptedKey(*cfrag.encrypted_key) for cfrag in cfrags]
+        ekey = API.PRE.combine(ekeys)
+        ekey = (ec.serialize(ekey.ekey), ekey.re_id)
+
+        # Everything except ekey is the same for all shares!
+        # TODO instead of trusting the first share, trust the majority
+        return ekey
 
 
 class SigningKeypair(Keypair):
