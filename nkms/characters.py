@@ -27,7 +27,6 @@ from nkms.network.server import NuCypherDHTServer, NuCypherSeedOnlyDHTServer
 from nkms.policy.constants import NOT_FROM_ALICE, NON_PAYMENT
 
 
-
 class Character(object):
     """
     A base-class for any character in our cryptography protocol narrative.
@@ -211,16 +210,16 @@ class Alice(Character):
 
         :return: Tuple(kfrags, eph_key_data)
         """
-        kfrags, eph_key_data = API.ecies_ephemeral_split_rekey(
-            alice_privkey, bytes(bob.seal.without_metabytes()), m, n)
-        return (kfrags, eph_key_data)
+        kfrags, pfrag = API.ecies_ephemeral_split_rekey(
+            alice_privkey, bob.public_key(EncryptingPower), m, n)
+        return kfrags, pfrag
 
     def create_policy(self,
-                        bob: "Bob",
-                        uri: bytes,
-                        m: int,
-                        n: int,
-                        ):
+                      bob: "Bob",
+                      uri: bytes,
+                      m: int,
+                      n: int,
+                      ):
         """
         Alice dictates a new group of policies.
         """
