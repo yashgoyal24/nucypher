@@ -71,6 +71,19 @@ class EncryptingKeypair(object):
         return ((ec.serialize(ekey.ekey), None),
                 cipher.encrypt(data))
 
+    def _decrypt_refactored_for_posterity(self,
+                                          combined_critical_mass, encrypted_message,
+                                          privkey: bytes = None) -> bytes:
+        ekey = umbral.EncryptedKey(ekey=ec.deserialize(self.pre.ecgroup, combined_critical_mass), re_id=None)
+        if privkey is None:
+            privkey = self._priv_key
+        else:
+            privkey = ec.deserialize(self.pre.ecgroup, privkey)
+
+        key = self.pre.decapsulate(privkey, ekey)
+        cipher = SecretBox(key)
+        return cipher.decrypt(encrypted_message)
+
     def decrypt(self,
                 edata: Tuple[bytes, bytes],
                 privkey: bytes = None) -> bytes:
