@@ -1,4 +1,5 @@
 import pytest
+from nkms.crypto import api
 
 from nkms.characters import Alice, Ursula, Character
 from nkms.crypto import api
@@ -123,3 +124,28 @@ def test_character_with_encrypting_power_can_encrypt():
     assert signature == NOT_SIGNED
 
     assert ciphertext is not None
+
+
+"""
+Chapter 3: Re-encryption
+"""
+def test_reencryption_without_policy(alice, bob, ursulas):
+    min_shares = 5
+    num_shares = 8
+
+    the_secret = b'Hello Bob'
+    the_secret_encrypted_for_alice = alice.encrypt_for(alice, the_secret)
+
+    alice_priv_enc = alice._crypto_power._power_ups[EncryptingPower].priv_key
+    kfrags = alice.generate_rekey_frags(alice_priv_enc, bob, min_shares, num_shares)[0]
+    encrypted_message = the_secret_encrypted_for_alice[0][0]
+
+    api.ecies_reencrypt(kfrags[0], pfrag.encrypted_key)
+    shares = [u.reencrypt(rk, e) for (u, rk) in zip(ursulas, kfrags)]
+
+    combined_critical_mass = bob.combine(shares)[0][0][0]
+
+    encrypted_ephemeral_key = shares[0][1]
+    ephemeral_key = bob.decrypt(encrypted_ephemeral_key)
+    the_secret = bob._decrypt_refactored_for_posterity(combined_critical_mass, encrypted_message, privkey=ephemeral_key)
+    assert the_secret == data
